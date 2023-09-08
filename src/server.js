@@ -31,4 +31,28 @@ axios({
     data: {
         grant_type: 'client_credentials'
     }
-}).then((response) => console.log(response.data));
+}).then((response) => {
+    const accessToken = response.data?.access_token;
+
+    const reqGN = axios.create({
+        baseURL: process.env.GN_ENDPOINT,
+        httpsAgent: agent,
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+        }
+    });
+
+    const dataCob = {
+        calendario: {
+            expiracao: 3600
+        }, 
+        valor: {
+            original: '100.00'
+        }, 
+        chave: 'fff1ec71-9e3f-4333-b303-aca507e52150',
+        solicitacaoPagador: 'Cobrança dos serviços de instalação solar.'
+    }
+
+    reqGN.post('/v2/cob', dataCob).then((response) => console.log(response.data));
+});
