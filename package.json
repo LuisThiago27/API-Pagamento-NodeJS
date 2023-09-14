@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/server.js"
+    "dev": "nodemon src/server.js",
+    "vercel-build": "npx src deploy"
   },
   "author": "Luis Thiago",
   "license": "ISC",
