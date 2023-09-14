@@ -6,7 +6,40 @@
     <title>API PIX | Gerencianet</title>
 </head>
 <body>
-    <h1>QR Code</h1>
-    <img src="<%= qrcodeImage %>" />
+        <h1>QR Code</h1>
+        <img src="<%= qrcodeImage %>" alt="">
+        
+        <div id="paymentStatus" style="display: none;">
+            <p>Pagamento confirmado com sucesso!</p>
+        </div>
+    
+    
+
+    <script>
+    function verificarStatusPagamento() {
+        fetch('/verificar-status-pagamento')
+            .then(response => response.json())
+            .then(data => {
+                console.log(data.verificaStatus);
+                if (data.verificaStatus === "CONCLUIDA") {
+                    document.getElementById("paymentStatus").style.display = "block";
+                    console.log("Pagamento confirmado");
+                    // Atualize a página ou exiba uma mensagem de sucesso aqui
+                } else {
+                    console.log("Aguardando pagamento");
+                    // Agende uma nova verificação de status após um intervalo de tempo.
+                    setTimeout(verificarStatusPagamento, 5000); // Verifique a cada 5 segundos (ajuste conforme necessário).
+                }
+            })
+            .catch(error => {
+                console.error("Erro ao verificar o status do pagamento", error);
+            });
+    }
+
+    // Chame esta função para iniciar a verificação do status assim que a página carregar.
+    verificarStatusPagamento();
+
+
+    </script>
 </body>
 </html>

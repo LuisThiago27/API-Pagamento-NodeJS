@@ -3,7 +3,7 @@ if(process.env.NODE_ENV !== 'production') {
 }
 
 const express = require('express');
-const bodyParser = requi('body-parser');
+const bodyParser = require('body-parser');
 const GNRequest = require('./apis/gerencianet');
 
 const app = express();
@@ -25,17 +25,41 @@ app.get('/', async (req, res) => {
             expiracao: 3600
         }, 
         valor: {
-            original: '100.00'
+            original: '0.01'
         }, 
         chave: 'fff1ec71-9e3f-4333-b303-aca507e52150',
         solicitacaoPagador: 'Cobrança dos serviços de instalação solar.'
     }
 
     const cobResponse = await reqGN.post('/v2/cob', dataCob);
+    const txidResponse = await cobResponse.data.txid;
     const qrcodeResponse = await reqGN.get(`/v2/loc/${cobResponse.data.loc.id}/qrcode`);
 
-    res.render('qrcode', { qrcodeImage: qrcodeResponse.data.imagemQrcode })
+    //SUBSTITUIR por 'txidResponse' depois. txid de concluida = 7fd91b446f3e465a8faabc6a10ba331d
+    iniciaVerificacao(txidResponse);
+    const dataTxid = await reqGN.get(`/v2/cob/${txidResponse}`);
+
+    res.render('qrcode', 
+    { 
+        qrcodeImage: qrcodeResponse.data.imagemQrcode, 
+        statusVerificado: dataTxid.data.status 
+    });
+
+    
 });
+
+function iniciaVerificacao (txidResponse) {
+    app.get('/verificar-status-pagamento', async (req, res) => {
+        const reqGN = await reqGNAlready;
+
+        const dataTxid = await reqGN.get(`/v2/cob/${txidResponse}`);
+        const verificaStatus = dataTxid.data.status;
+
+        res.json({ verificaStatus });
+    });
+}
+
+
 
 app.get('/cobrancas', async (req, res) => {
     const reqGN = await reqGNAlready;
