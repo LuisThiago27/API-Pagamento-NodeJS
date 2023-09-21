@@ -1,4 +1,11 @@
-certs
+# package directories
 node_modules
+jspm_packages
+
+# Serverless directories
+.serverless
+
+# Others directories
+certs
 .env
 README.md
