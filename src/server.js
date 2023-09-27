@@ -30,7 +30,7 @@ app.post('/processar-cobranca', async (req, res) => {
     const txidResponse = await cobResponse.data.txid;
     const qrcodeResponse = await reqGN.get(`/v2/loc/${cobResponse.data.loc.id}/qrcode`);
 
-    res.json({ mensagem: 'Cobrança processada com sucesso', qrcodeResult: qrcodeResponse.data.imagemQrcode, txidResult: txidResponse });
+    res.json({ codQRCodeResult: qrcodeResponse.data.qrcode, qrcodeResult: qrcodeResponse.data.imagemQrcode, txidResult: txidResponse });
 
 });
 
