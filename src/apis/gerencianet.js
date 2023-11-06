@@ -13,8 +13,6 @@ const agent = new https.Agent({
     passphrase: ''  
 });
 
-
-
 const authenticate = ({clientID, clientSecret}) => {
     const credentials = Buffer.from(
         `${clientID}:${clientSecret}`
@@ -48,4 +46,37 @@ const GNRequest = async (credentials) => {
     });
 } 
 
-module.exports = GNRequest;
+const authenticateCard = ({clientID, clientSecret}) => {
+    const credentials = Buffer.from(
+        `${clientID}:${clientSecret}`
+    ).toString('base64');
+
+    return axios({
+        method: 'POST',
+        url: `https://cobrancas-h.api.efipay.com.br/v1/authorize`,
+        headers: {
+            Authorization: `Basic ${credentials}`,
+            'Content-Type': 'application/json'
+        },
+        httpsAgent: agent,
+        data: {
+            grant_type: 'client_credentials'
+        }
+    });
+}
+
+const GNRequestCard = async (credentials) => {
+    const authResponse = await authenticateCard(credentials);
+    const accessToken = authResponse.data?.access_token;
+
+    return axios.create({
+        baseURL: 'https://cobrancas-h.api.efipay.com.br',
+        httpsAgent: agent,
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+        }
+    });
+} 
+
+module.exports = { GNRequest, GNRequestCard };

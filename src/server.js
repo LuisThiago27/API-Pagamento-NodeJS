@@ -1,7 +1,7 @@
 const serverless = require('serverless-http');
 const express = require('express');
 const bodyParser = require('body-parser');
-const GNRequest = require('./apis/gerencianet');
+const { GNRequest, GNRequestCard } = require('./apis/gerencianet');
 const cors = require('cors');
 
 const app = express();
@@ -10,6 +10,11 @@ app.use(bodyParser.json());
 app.use(cors());
 
 const reqGNAlready = GNRequest({
+    clientID: process.env.GN_CLIENT_ID,
+    clientSecret: process.env.GN_CLIENT_SECRET
+});
+
+const reqGNAlreadyCard = GNRequestCard({
     clientID: process.env.GN_CLIENT_ID,
     clientSecret: process.env.GN_CLIENT_SECRET
 });
@@ -42,6 +47,16 @@ app.get('/verificar-status', async (req, res) => {
     const verificaStatus = dataTxid.data.status;
 
     res.json({ verificaStatus });
+});
+
+app.post('/processar-cobranca-cartao', async (req, res) => {
+    const reqGN = await reqGNAlreadyCard;
+    const dadosGerencianet = req.body;
+
+    const cobResponse = await reqGN.post('/v1/charge/one-step', dadosGerencianet);
+    const cobCard = cobResponse.data;
+
+    res.json({ cobCard });
 });
 
 module.exports.handler = serverless(app);
